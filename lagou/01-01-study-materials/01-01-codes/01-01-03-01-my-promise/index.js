@@ -32,3 +32,17 @@ function p2 () {
 p2()
   .then(value => console.log(value))
   .catch(reason => console.log(reason))
+
+// MyPromise.resolve()
+// .then(() => {
+//   console.log(0)
+//   return MyPromise.resolve(4)
+// })
+// .then((res) => {console.log(res)})
+
+// MyPromise.resolve()
+// .then(() => {console.log(1)})
+// .then(() => {console.log(2)})
+// .then(() => {console.log(3)})
+// .then(() => {console.log(5)})
+// .then(() => {console.log(6)})
