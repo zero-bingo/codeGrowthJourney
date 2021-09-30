@@ -1,15 +1,31 @@
 const path = require('path')
-const { DefinePlugin } = require('webpack')
+const { DefinePlugin, HotModuleReplacementPlugin } = require('webpack')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
-  entry: './src/index.js',
+  mode: 'none',
+  devtool: false,
+  entry: [
+    './src/index.js',
+    // 'webpack-hot-middleware/client'
+  ],
   output: {
-    filename: 'bundle.js',
+    filename: 'js/bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    // assetModuleFilename: 'img/[name].[hash:10][ext]'
+    // assetModuleFilename: 'img/[name].[hash:10][ext]',
+    publicPath: '/' // 打包后index.html的资源引用路径 = 域名+publicPath+filename
+  },
+  devServer: {
+    hot: true,
+    hotOnly: true,
+    port: 4000,
+    // open: true,
+    compress: true,
+    publicPath: '/', // 指定本地服务所在的虚拟目录（本地打包是放在内存中的）
+    // contentBase: path.resolve(__dirname, 'public'), // 依赖的非经过打包的资源路径
+    // watchContentBase: true,
   },
   module: {
     rules: [
@@ -76,12 +92,39 @@ module.exports = {
         generator: {
           filename: 'font/[name].[hash:3][ext]'
         }
+      },
+      {
+        test: /\.js$/,
+        // use: [
+        //   {
+        //     loader: 'babel-loader',
+        //     options: {
+        //       // plugins: []
+        //       presets: [
+        //         [
+        //           '@babel/preset-env',
+        //           // {targets: 'chrome 91'}, // 兼容权重优先级大于browserslistrc
+        //         ]
+        //       ]
+        //     }
+        //   }
+        // ]
+        use: ['babel-loader'] // 利用babel.config.js详细配置
+      },
+      // {
+      //   test: /\.jsx?$/,
+      //   use: ['babel-loader']
+      // },
+      {
+        test: /\.vue$/,
+        use: ['vue-loader']
       }
     ]
   },
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
+      // title: '1321',
       template: './public/index.html'
     }),
     new DefinePlugin({
@@ -90,12 +133,15 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: 'public',
+          from: 'public/*',
           globOptions: {
-            ignore: ['**/index.html']
+            dot: true,
+            gitignore: true,
+            ignore: ['**/*.html']
           }
         }
       ]
-    })
+    }),
+    // new HotModuleReplacementPlugin(),
   ]
 }
