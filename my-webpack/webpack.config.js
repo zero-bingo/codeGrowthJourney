@@ -5,17 +5,25 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
-  mode: 'none',
-  devtool: false,
-  entry: [
-    './src/index.js',
-    // 'webpack-hot-middleware/client'
-  ],
+  mode: 'development',
+  devtool: 'source-map',
+  // entry: [
+  //   './src/index.js',
+  //   // 'webpack-hot-middleware/client'
+  // ],
+  entry: {
+    main1: './src/main1.js',
+    main2: {
+      import: './src/main2.js',
+      dependOn: 'lodash'
+    },
+    lodash: 'lodash'
+  },
   output: {
-    filename: 'js/bundle.js',
+    filename: 'js/[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
     // assetModuleFilename: 'img/[name].[hash:10][ext]',
-    publicPath: '/' // 打包后index.html的资源引用路径 = 域名+publicPath+filename
+    publicPath: './' // 打包后index.html的资源引用路径 = 域名+publicPath+filename
   },
   devServer: {
     hot: true,
@@ -23,9 +31,23 @@ module.exports = {
     port: 4000,
     // open: true,
     compress: true,
-    publicPath: '/', // 指定本地服务所在的虚拟目录（本地打包是放在内存中的）
+    publicPath: './', // 指定本地服务所在的虚拟目录（本地打包是放在内存中的）
     // contentBase: path.resolve(__dirname, 'public'), // 依赖的非经过打包的资源路径
     // watchContentBase: true,
+    proxy: {
+      '/api': {
+        target: 'https://api.github.com',
+        pathRewrite: {'^/api': ''},
+        changeOrigin: true
+      }
+    },
+  },
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.json'],
+    // mainFiles: ['index'],
+    alias: {
+      '@': path.resolve(__dirname, 'src')
+    }
   },
   module: {
     rules: [
@@ -50,7 +72,7 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              importLoaders: 1,
+              importLoaders: 2,
               esModule: false
             }
           },
@@ -70,7 +92,7 @@ module.exports = {
         //     limit: 25 * 1024
         //   }
         // }]
-        // 在webpack中 不必配置loader了
+        // 在webpack5中 不必配置loader了
         // type: 'asset/resource', // 相当于 file-loader
         // generator: {
         //   filename: 'img/[name].[hash:10][ext]'
@@ -116,6 +138,10 @@ module.exports = {
       //   use: ['babel-loader']
       // },
       {
+        test: /\.ts$/,
+        use: ['babel-loader']
+      },
+      {
         test: /\.vue$/,
         use: ['vue-loader']
       }
@@ -134,6 +160,7 @@ module.exports = {
       patterns: [
         {
           from: 'public/*',
+          to: '[name].[ext]',
           globOptions: {
             dot: true,
             gitignore: true,
