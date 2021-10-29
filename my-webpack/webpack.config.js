@@ -3,6 +3,8 @@ const { DefinePlugin, HotModuleReplacementPlugin } = require('webpack')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin');
+const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -20,11 +22,15 @@ module.exports = {
     lodash: 'lodash'
   },
   output: {
-    filename: 'js/[name].bundle.js',
+    filename: 'js/[name].[contentHash:8].bundle.js',
     path: path.resolve(__dirname, 'dist'),
     // assetModuleFilename: 'img/[name].[hash:10][ext]',
-    publicPath: './' // 打包后index.html的资源引用路径 = 域名+publicPath+filename
+    publicPath: './', // 打包后index.html的资源引用路径 = 域名+publicPath+filename
+    chunkFilename: 'js/[name].chunk.js'
   },
+  // externals: {
+  //   lodash: '_'
+  // },
   devServer: {
     hot: true,
     hotOnly: true,
@@ -41,6 +47,20 @@ module.exports = {
         changeOrigin: true
       }
     },
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        extractComments: true,
+      }),
+    ],
+    splitChunks: {
+      chunks: 'all',
+      minSize: 20000,
+      maxSize: 20000,
+      minChunks: 1
+    }
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.json'],
@@ -170,5 +190,8 @@ module.exports = {
       ]
     }),
     // new HotModuleReplacementPlugin(),
+    // new AddAssetHtmlPlugin({
+    //   filepath: require.resolve('./some-file')
+    // }),
   ]
 }
