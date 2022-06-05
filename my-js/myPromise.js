@@ -119,27 +119,104 @@ function resolveResult (p2, x, resolve, reject) {
 }
 
 // test
-const promise = new Mypromiseromise((resolve, reject) => {
-  resolve(1)
-  // reject(2)
-})
-function otherP() {
-  return new MyPromise((resolve, reject) => {
-    setTimeout(resolve, 3000, 'otherP')
-    // resolve('otherP')
-    // reject(2)
-  })
-}
+// const promise = new Mypromiseromise((resolve, reject) => {
+//   resolve(1)
+//   // reject(2)
+// })
+// function otherP() {
+//   return new MyPromise((resolve, reject) => {
+//     setTimeout(resolve, 3000, 'otherP')
+//     // resolve('otherP')
+//     // reject(2)
+//   })
+// }
 
-promise
-  .then(
-    val => {
-      console.log(val)
-      return otherP()
-    },
-    err => console.log(err)
-  )
-  .then(
-    val => console.log(val),
-    err => console.log(err)
-  )
+// promise
+//   .then(
+//     val => {
+//       console.log(val)
+//       return otherP()
+//     },
+//     err => console.log(err)
+//   )
+//   .then(
+//     val => console.log(val),
+//     err => console.log(err)
+//   )
+
+Promise.resolve()
+.then(() => {
+  console.log(0)
+  return Promise.resolve(4)
+  // return 4
+})
+.then((res) => {console.log(res)})
+
+Promise.resolve()
+.then(() => {console.log(1)})
+.then(() => {console.log(2)})
+.then(() => {console.log(3)})
+.then(() => {console.log(5)})
+.then(() => {console.log(6)})
+
+/**
+ * 向消息队列中推入期约1落定后需要执行的回调then0
+    向消息队列中推入期约2落定后需要执行的回调then1
+    第一次eventloop结束【then0，then1】
+
+    第一个期约落定为resolved状态
+    进入then0，输出0，return4
+    向消息队列中推入期约落定后执行then4
+    推出then0
+    第二个期约落定为resolved状态
+    进入then1，输出1
+    向消息队列中推入期约落定后执行then2
+    推出then1
+    第二次eventloop结束【then4，then2】
+
+    then4的上一个期约返回值为4，状态为resolved落定
+    进入执行then4，输出4
+    推出then4
+    then2的上一个期约没有返回值，没改变状态，为resolved落定
+    进入then2，输出2
+    向消息队列中推入期约落定后执行then3
+    第三次eventloop结束【then3】
+ * 
+*/
+
+
+/**
+ * 向消息队列中推入期约1落定后需要执行的回调then0
+向消息队列中推入期约2落定后需要执行的回调then1
+第一次eventloop结束【then0，then1】
+
+第一个期约落定为resolved状态
+进入then0，输出0，return新的期约
+向消息队列中推入Promise.resolve(4)
+推出then0
+第二个期约落定为resolved状态
+进入then1，输出1
+向消息队列中推入期约落定后执行then2
+推出then1
+第二次eventloop结束【Promise.resolve(4)，then2】
+
+新的期约Promise.resolve(4)执行，状态为resolved落定
+向消息队列中推入return 4
+推出Promise.resolve(4)
+then2的上一个期约没有返回值，没改变状态，为resolved落定
+进入then2，输出2
+向消息队列中推入期约落定后执行then3
+第三次eventloop结束【return 4，then3】// 012
+
+return 4执行
+向消息队列中推入期约落定后执行then4
+推出return 4
+then3的上一个期约没有返回值，没改变状态，为resolved落定
+进入then3，输出3
+向消息队列中推入期约落定后执行then5
+第三次eventloop结束【then4，then5】// 0123
+
+。。。
+
+ * */
+// 输出结果0123456 请解释！
