@@ -9,18 +9,18 @@ const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 module.exports = {
   mode: 'development',
   devtool: 'source-map',
-  // entry: [
-  //   './src/index.js',
-  //   // 'webpack-hot-middleware/client'
-  // ],
-  entry: {
-    main1: './src/main1.js',
-    main2: {
-      import: './src/main2.js',
-      dependOn: 'lodash'
-    },
-    lodash: 'lodash'
-  },
+  entry: [
+    './src/index.js',
+    // 'webpack-hot-middleware/client'
+  ],
+  // entry: {
+  //   main1: './src/main1.js',
+  //   main2: {
+  //     import: './src/main2.js',
+  //     dependOn: 'lodash'
+  //   },
+  //   lodash: 'lodash'
+  // },
   output: {
     filename: 'js/[name].[contentHash:8].bundle.js',
     path: path.resolve(__dirname, 'dist'),
